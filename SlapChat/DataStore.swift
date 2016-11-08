@@ -11,9 +11,12 @@ import CoreData
 
 class DataStore {
     
+    var messages = [Message]()
+    
     static let sharedInstance = DataStore()
     
     private init() {}
+    
     
     // MARK: - Core Data stack
     
@@ -24,7 +27,7 @@ class DataStore {
          application to it. This property is optional since there are legitimate
          error conditions that could cause the creation of the store to fail.
          */
-        let container = NSPersistentContainer(name: "SlapChat")
+        let container = NSPersistentContainer(name: "DataModelSlapChat")
         container.loadPersistentStores(completionHandler: { (storeDescription, error) in
             if let error = error as NSError? {
                 // Replace this implementation with code to handle the error appropriately.
@@ -60,4 +63,60 @@ class DataStore {
         }
     }
     
+    
+    func fetchData() {
+        let context = persistentContainer.viewContext
+        
+        let fetchRequest = NSFetchRequest<Message>(entityName: "Message")
+        
+        do {
+            messages = try context.fetch(fetchRequest)
+        } catch {
+            
+        }
+        
+        
+    }
+    
+    func generateNewData(msg: String) {
+        
+        let context = persistentContainer.viewContext
+        
+        let entity = NSEntityDescription.entity(forEntityName: "Message", in: context)
+        let task = NSManagedObject(entity: entity!, insertInto: context) as! Message
+        
+        task.content = msg
+        task.createdAt = NSDate()
+        
+        do {
+            try context.save()
+            messages.append(task)
+        }catch{
+            
+        }
+        
+        self.saveContext()
+        self.fetchData()
+        
+    }
+    
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
